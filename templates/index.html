@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convergent Diet — Nutrition Instrument</title>
+<style>
+  :root{
+    --ink:#2b2622; --parch:#f4efe4; --parch2:#efe8d8; --line:#d8cdb5;
+    --green:#2e5c3a; --green-soft:#5a8268; --gold:#8b6914; --rust:#8a3d2a;
+    --over:#9a5b1f; --muted:#7d7363;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--parch);color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    line-height:1.5}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px}
+  header{border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:8px}
+  h1{font-size:30px;margin:0;letter-spacing:.2px}
+  .sub{color:var(--muted);font-style:italic;font-size:15px;margin-top:4px}
+  h2{font-size:15px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--green);border-bottom:1px solid var(--line);
+    padding-bottom:6px;margin:36px 0 14px;font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+  .field label{display:block;font-size:12px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .field input,.field select{width:100%;padding:8px 10px;border:1px solid var(--line);
+    background:#fbf8f0;font-family:inherit;font-size:15px;color:var(--ink);border-radius:2px}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--green)}
+  .meta{display:flex;flex-wrap:wrap;gap:24px;margin:14px 0 4px;
+    padding:12px 16px;background:var(--parch2);border-left:3px solid var(--gold)}
+  .meta .m{font-size:14px}
+  .meta .m b{display:block;font-size:22px;color:var(--green);font-weight:600}
+  .meta .m span{color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  /* the signature element: the balance bar */
+  .bar-row td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+  .nut-name{white-space:nowrap;font-size:14.5px}
+  .nut-scale{font-size:11px;color:var(--muted);font-style:italic}
+  .track{position:relative;height:16px;background:#e7dec9;border-radius:2px;overflow:hidden}
+  .fill{position:absolute;left:0;top:0;height:100%;background:var(--green-soft);
+    transition:width .35s ease}
+  .fill.short{background:#c08a3e}
+  .fill.over{background:var(--over)}
+  /* 100% mark */
+  .track::after{content:"";position:absolute;left:100%;top:0;height:100%;
+    width:0;border-left:1px dashed #fff}
+  .mark100{position:absolute;left:100%;top:-3px;height:22px;border-left:1px solid var(--ink);opacity:.45}
+  .pct{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;font-size:14px}
+  .abs{color:var(--gold);font-weight:600}
+  .absorbed-mark{position:absolute;top:-2px;height:20px;width:2px;background:var(--gold);opacity:.9}
+  .amt{color:var(--muted);font-size:12.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .pill{display:inline-block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+    padding:1px 7px;border-radius:10px;border:1px solid var(--line);color:var(--muted)}
+  .pill.floor{border-color:var(--green-soft);color:var(--green)}
+  .pill.ceiling,.pill.band{border-color:var(--gold);color:var(--gold)}
+  .serv input{width:64px;padding:5px 6px;border:1px solid var(--line);
+    background:#fbf8f0;font-family:inherit;font-size:14px;text-align:right;border-radius:2px}
+  .serv-tbl td{padding:6px 8px;border-bottom:1px solid var(--line)}
+  .note{font-size:13px;color:var(--muted);font-style:italic;margin-top:8px}
+  .ok{color:var(--green)} .bad{color:var(--rust)}
+  .legend{font-size:12.5px;color:var(--muted);margin-top:10px;display:flex;gap:18px;flex-wrap:wrap}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+  @media(max-width:760px){.cols{grid-template-columns:1fr}}
+  button.calc{margin-top:14px;padding:9px 18px;background:var(--green);color:#fbf8f0;
+    border:none;font-family:inherit;font-size:14px;letter-spacing:.04em;border-radius:2px;cursor:pointer}
+  button.calc:hover{background:#244a2f}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">
+    <div>
+      <h1>Convergent Diet — Nutrition Instrument</h1>
+      <div class="sub">A gap-finder, not a meal-dictator. The numbers are good to within a chunk; read the structure, not the decimals.</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <a href="/optimize" style="display:inline-block;padding:8px 16px;background:var(--gold);color:#fbf8f0;text-decoration:none;font-size:14px;border-radius:3px;letter-spacing:.03em">⚖ Optimize</a>
+      <a href="/staples" style="display:inline-block;padding:8px 16px;background:var(--green);color:#fbf8f0;text-decoration:none;font-size:14px;border-radius:3px;letter-spacing:.03em">✎ Edit staples</a>
+    </div>
+  </header>
+
+  <h2>Your profile</h2>
+  <div class="grid" id="profile">
+    <div class="field"><label>Sex</label>
+      <select id="sex">
+        <option value="male" {{ 'selected' if profile.sex=='male' }}>male</option>
+        <option value="female" {{ 'selected' if profile.sex=='female' }}>female</option>
+      </select></div>
+    <div class="field"><label>Age</label><input id="age" type="number" value="{{ profile.age }}"></div>
+    <div class="field"><label>Height (in)</label><input id="height_in" type="number" value="{{ profile.height_in }}"></div>
+    <div class="field"><label>Weight (lb)</label><input id="weight_lb" type="number" value="{{ profile.weight_lb }}"></div>
+    <div class="field"><label>Target weight (lb)</label><input id="target_weight_lb" type="number" value="{{ profile.target_weight_lb }}"></div>
+    <div class="field"><label>Lean mass (lb, DEXA)</label><input id="lean_mass_lb" type="number" placeholder="optional" value="{{ profile.lean_mass_lb or '' }}"></div>
+    <div class="field"><label>Activity</label>
+      <select id="activity">
+        {% for a in activities %}<option value="{{ a }}" {{ 'selected' if profile.activity==a }}>{{ a }}</option>{% endfor %}
+      </select></div>
+    <div class="field"><label>Goal</label>
+      <select id="goal">
+        <option value="lose" {{ 'selected' if profile.goal=='lose' }}>lose</option>
+        <option value="maintain" {{ 'selected' if profile.goal=='maintain' }}>maintain</option>
+        <option value="gain" {{ 'selected' if profile.goal=='gain' }}>gain</option>
+      </select></div>
+    <div class="field"><label>Protein g/kg</label><input id="protein_g_per_kg" type="number" step="0.1" value="{{ profile.protein_g_per_kg }}"></div>
+  </div>
+  <button class="calc" onclick="recalc()">Recalculate for my body</button>
+
+  <div class="meta" id="meta">
+    <div class="m"><b id="m-bmr">{{ coverage.meta.bmr }}</b><span id="m-bmr-method">{{ coverage.meta.bmr_method }}</span></div>
+    <div class="m"><b id="m-tdee">{{ coverage.meta.tdee }}</b><span>maintenance kcal</span></div>
+    <div class="m"><b id="m-energy">{{ coverage.meta.energy }}</b><span>target kcal ({{ coverage.meta.goal }})</span></div>
+    <div class="m"><b id="m-protein">{{ coverage.macros[1].target if coverage.macros|length>1 }}</b><span>protein g floor</span></div>
+  </div>
+  <div class="note">Energy and protein scale with your body and composition. Vitamin and mineral targets are fixed population RDAs — they do <b>not</b> change with your weight, and the tool holds them fixed on purpose rather than inventing a dependence that isn't real.</div>
+
+  <div class="cols">
+    <div>
+      <h2>Today's plate</h2>
+      <table class="serv-tbl">
+        {% for r in rows %}
+        <tr data-fdc="{{ r.fdc_id }}">
+          <td>{{ r.label }}<div class="nut-scale">{{ r.usda_description }}</div></td>
+          <td class="serv" style="white-space:nowrap">
+            <input class="qty" type="number" step="0.25" min="0"
+                   value="{{ r.serving.qty if r.serving else r.default_grams }}"
+                   data-fdc="{{ r.fdc_id }}">
+            <select class="portion" data-fdc="{{ r.fdc_id }}">
+              {% set sel = r.serving.portion_desc if r.serving else 'grams' %}
+              {% for p in r.portions %}
+                <option value="{{ p.description }}" data-grams="{{ p.grams }}" {{ 'selected' if sel==p.description }}>{{ p.description }}</option>
+              {% endfor %}
+              <option value="grams" data-grams="1" {{ 'selected' if sel=='grams' }}>grams</option>
+            </select>
+          </td>
+          <td class="amt"><span class="gramsout" data-fdc="{{ r.fdc_id }}">{{ r.default_grams }}</span> g</td>
+        </tr>
+        {% endfor %}
+      </table>
+      <div class="note">Enter the amount and pick a measure — ¼ cup, 1 can, 2 eggs. Grams are computed for you and your choice is saved. Pick "grams" to enter weight directly.</div>
+    </div>
+
+    <div>
+      <h2>Coverage — worst gaps first</h2>
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:8px;padding:8px 10px;background:var(--parch2);border-left:3px solid var(--gold)">
+        <b>This meal's context</b> (affects absorbed iron, zinc, vitamin A):<br>
+        <label style="margin-right:10px"><input type="checkbox" id="meal_vitamin_c"> vitamin-C food present</label>
+        <label style="margin-right:10px"><input type="checkbox" id="meal_meat_factor"> meat/fish present</label>
+        <label style="margin-right:10px"><input type="checkbox" id="meal_soaked_fermented" checked> grains/legumes soaked</label>
+        <label style="margin-right:10px"><input type="checkbox" id="meal_fat_present" checked> fat present</label>
+        <label style="margin-right:10px"><input type="checkbox" id="meal_tea_coffee"> tea/coffee with meal</label>
+        <label><input type="checkbox" id="meal_high_calcium"> big dairy load</label>
+      </div>
+      <table id="micros">
+        {% for n in coverage.micros %}
+        <tr class="bar-row">
+          <td class="nut-name">{{ n.name }}<div class="nut-scale">{% if n.basis %}absorbed: {{ n.basis }}{% else %}{{ n.scaling }}{% endif %}</div></td>
+          <td style="width:46%"><div class="track"><div class="mark100"></div>
+            <div class="fill {{ 'short' if n.pct<85 }} {{ 'over' if n.over_upper }}" style="width:{{ [n.pct,140]|min }}%"></div>
+            {% if n.absorbed_pct is defined %}<div class="absorbed-mark" style="left:{{ [n.absorbed_pct,140]|min }}%"></div>{% endif %}
+          </div></td>
+          <td class="pct">{% if n.absorbed_pct is defined %}<span title="content">{{ n.pct }}%</span> <span class="abs" title="absorbed estimate">→{{ n.absorbed_pct }}%</span>{% else %}{{ n.pct }}%{% endif %}</td>
+          <td class="amt">{% if n.absorbed_pct is defined %}~{{ n.absorbed }} abs ({{ n.absorbed_low }}–{{ n.absorbed_high }}){% else %}{{ n.got }}/{{ n.target }} {{ n.unit|lower }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      <div class="legend">
+        <span><i style="background:#5a8268"></i>met</span>
+        <span><i style="background:#c08a3e"></i>short (&lt;85%)</span>
+        <span><i style="background:#9a5b1f"></i>over upper limit</span>
+        <span><i style="background:#8b6914"></i>absorbed estimate (gold mark)</span>
+        <span>dashed line = 100%</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>Macros</h2>
+  <table id="macros">
+    {% for n in coverage.macros %}
+    <tr class="bar-row">
+      <td class="nut-name">{{ n.name }} <span class="pill {{ n.kind }}">{{ n.kind }}</span></td>
+      <td style="width:46%"><div class="track"><div class="mark100"></div>
+        <div class="fill {{ 'short' if n.pct<85 }} {{ 'over' if n.over_upper }}" style="width:{{ [n.pct,140]|min }}%"></div></div></td>
+      <td class="pct">{{ n.pct }}%</td>
+      <td class="amt">{{ n.got }}/{{ n.target }} {{ n.unit|lower }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Data presence — which staples were found</h2>
+  <table>
+    {% for p in presence %}
+    <tr class="bar-row">
+      <td class="nut-name">{{ p.label }}</td>
+      <td class="amt">fdc {{ p.fdc_id }}</td>
+      <td>{% if p.has_nutrients %}<span class="ok">✓ in dataset</span>{% else %}<span class="bad">✗ missing — backfill needed</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% if missing %}<div class="note bad">{{ missing|length }} item(s) not found in the loaded data. Update their fdc_ids in repertoire.py after checking the real download.</div>{% endif %}
+
+</div>
+
+<script>
+// --- household-measure conversion ---
+function rowGrams(fdc){
+  const qty=parseFloat(document.querySelector(`input.qty[data-fdc="${fdc}"]`).value)||0;
+  const sel=document.querySelector(`select.portion[data-fdc="${fdc}"]`);
+  const gramsEach=parseFloat(sel.selectedOptions[0].dataset.grams)||1;
+  return Math.round(qty*gramsEach*100)/100;
+}
+function refreshGrams(fdc){
+  const g=rowGrams(fdc);
+  document.querySelector(`.gramsout[data-fdc="${fdc}"]`).textContent=g;
+  return g;
+}
+function wirePlate(){
+  document.querySelectorAll('tr[data-fdc]').forEach(tr=>{
+    const fdc=tr.dataset.fdc;
+    const qty=tr.querySelector('input.qty');
+    const portion=tr.querySelector('select.portion');
+    if(!qty||!portion) return;
+    const onChange=async()=>{
+      const g=refreshGrams(fdc);
+      // autosave the serving choice
+      fetch('/api/staple/serving',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({fdc_id:Number(fdc),qty:parseFloat(qty.value)||0,
+          portion_desc:portion.value,grams:g})});
+      recalc();
+    };
+    qty.addEventListener('input',()=>{refreshGrams(fdc);});
+    qty.addEventListener('change',onChange);
+    portion.addEventListener('change',onChange);
+  });
+  // initialise gram readouts
+  document.querySelectorAll('tr[data-fdc]').forEach(tr=>refreshGrams(tr.dataset.fdc));
+}
+window.addEventListener('DOMContentLoaded',wirePlate);
+
+function gatherProfile(){
+  const ids=["sex","age","height_in","weight_lb","target_weight_lb","lean_mass_lb","activity","goal","protein_g_per_kg"];
+  const p={};
+  ids.forEach(id=>{const el=document.getElementById(id); if(el && el.value!=="") p[id]=el.value;});
+  return p;
+}
+function gatherMeal(){
+  const keys=["vitamin_c","meat_factor","soaked_fermented","fat_present","tea_coffee","high_calcium"];
+  const m={};
+  keys.forEach(k=>{const el=document.getElementById("meal_"+k); if(el) m[k]=el.checked;});
+  return m;
+}
+function wireMeal(){
+  ["vitamin_c","meat_factor","soaked_fermented","fat_present","tea_coffee","high_calcium"].forEach(k=>{
+    const el=document.getElementById("meal_"+k); if(el) el.addEventListener("change",recalc);
+  });
+}
+window.addEventListener('DOMContentLoaded',wireMeal);
+
+function gatherServings(){
+  const s={};
+  document.querySelectorAll('tr[data-fdc]').forEach(tr=>{ s[tr.dataset.fdc]=rowGrams(tr.dataset.fdc); });
+  return s;
+}
+async function recalc(){
+  const res=await fetch('/api/recalculate',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({profile:gatherProfile(),servings:gatherServings(),meal:gatherMeal()})});
+  const c=await res.json();
+  document.getElementById('m-bmr').textContent=c.meta.bmr;
+  document.getElementById('m-bmr-method').textContent=c.meta.bmr_method;
+  document.getElementById('m-tdee').textContent=c.meta.tdee;
+  document.getElementById('m-energy').textContent=c.meta.energy;
+  const draw=(rows,elid,withPill)=>{
+    const el=document.getElementById(elid); el.innerHTML="";
+    rows.forEach(n=>{
+      const w=Math.min(n.pct,140);
+      const cls=n.over_upper?"over":(n.pct<85?"short":"");
+      const pill=withPill?` <span class="pill ${n.kind}">${n.kind}</span>`:"";
+      const hasAbs=(n.absorbed_pct!==undefined);
+      const absMark=hasAbs?`<div class="absorbed-mark" style="left:${Math.min(n.absorbed_pct,140)}%"></div>`:"";
+      const scale=hasAbs?`absorbed: ${n.basis}`:(n.scaling||"");
+      const pctCell=hasAbs?`<span title="content">${n.pct}%</span> <span class="abs" title="absorbed">→${n.absorbed_pct}%</span>`:`${n.pct}%`;
+      const amtCell=hasAbs?`~${n.absorbed} abs (${n.absorbed_low}–${n.absorbed_high})`:`${n.got}/${n.target} ${n.unit.toLowerCase()}`;
+      el.insertAdjacentHTML('beforeend',
+        `<tr class="bar-row"><td class="nut-name">${n.name}${pill}<div class="nut-scale">${scale}</div></td>
+         <td style="width:46%"><div class="track"><div class="mark100"></div>
+         <div class="fill ${cls}" style="width:${w}%"></div>${absMark}</div></td>
+         <td class="pct">${pctCell}</td><td class="amt">${amtCell}</td></tr>`);
+    });
+  };
+  draw(c.micros,'micros',false);
+  draw(c.macros,'macros',true);
+  const pEl=document.getElementById('m-protein');
+  const prot=c.macros.find(x=>x.name==='Protein'); if(prot) pEl.textContent=prot.target;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+[
+  {
+    "fdc_id": 169705,
+    "label": "Oats (dry)",
+    "default_grams": 80,
+    "usda_description": "Oats (Includes foods for USDA's Food Distribution Program)",
+    "tags": [
+      "weigh-dry"
+    ]
+  },
+  {
+    "fdc_id": 170283,
+    "label": "Barley (hulled, dry)",
+    "default_grams": 80,
+    "usda_description": "Barley, hulled",
+    "tags": [
+      "weigh-dry"
+    ]
+  },
+  {
+    "fdc_id": 172428,
+    "label": "Green peas (dry)",
+    "default_grams": 100,
+    "usda_description": "Peas, green, split, mature seeds, raw",
+    "tags": [
+      "weigh-dry"
+    ]
+  },
+  {
+    "fdc_id": 175205,
+    "label": "Broad beans (dry)",
+    "default_grams": 100,
+    "usda_description": "Broadbeans (fava beans), mature seeds, raw",
+    "tags": [
+      "weigh-dry"
+    ]
+  },
+  {
+    "fdc_id": 168462,
+    "label": "Spinach (raw)",
+    "default_grams": 60,
+    "usda_description": "Spinach, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 169246,
+    "label": "Leeks (raw)",
+    "default_grams": 89,
+    "usda_description": "Leeks, (bulb and lower leaf-portion), raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 170076,
+    "label": "Sorrel",
+    "default_grams": 60,
+    "usda_description": "Dock, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 168421,
+    "label": "Kale (raw)",
+    "default_grams": 67,
+    "usda_description": "Kale, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 169975,
+    "label": "Cabbage (raw)",
+    "default_grams": 89,
+    "usda_description": "Cabbage, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 170379,
+    "label": "Broccoli (brassica)",
+    "default_grams": 91,
+    "usda_description": "Broccoli, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 169145,
+    "label": "Beets (raw)",
+    "default_grams": 82,
+    "usda_description": "Beets, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 168457,
+    "label": "Seaweed (kelp)",
+    "default_grams": 10,
+    "usda_description": "Seaweed, kelp, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 170417,
+    "label": "Parsnips (raw)",
+    "default_grams": 78,
+    "usda_description": "Parsnips, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 170393,
+    "label": "Carrots (raw)",
+    "default_grams": 61,
+    "usda_description": "Carrots, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 171688,
+    "label": "Apple",
+    "default_grams": 125,
+    "usda_description": "Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)",
+    "tags": []
+  },
+  {
+    "fdc_id": 169118,
+    "label": "Pear",
+    "default_grams": 140,
+    "usda_description": "Pears, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 167755,
+    "label": "Raspberries",
+    "default_grams": 100,
+    "usda_description": "Raspberries, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 173946,
+    "label": "Blackberries",
+    "default_grams": 100,
+    "usda_description": "Blackberries, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 167762,
+    "label": "Strawberries",
+    "default_grams": 100,
+    "usda_description": "Strawberries, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 171711,
+    "label": "Blueberries",
+    "default_grams": 100,
+    "usda_description": "Blueberries, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 169134,
+    "label": "Pomegranate",
+    "default_grams": 87,
+    "usda_description": "Pomegranates, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 171719,
+    "label": "Cherries",
+    "default_grams": 100,
+    "usda_description": "Cherries, sweet, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 170581,
+    "label": "Hazelnuts",
+    "default_grams": 28,
+    "usda_description": "Nuts, hazelnuts or filberts",
+    "tags": []
+  },
+  {
+    "fdc_id": 170187,
+    "label": "Walnuts",
+    "default_grams": 28,
+    "usda_description": "Nuts, walnuts, english",
+    "tags": []
+  },
+  {
+    "fdc_id": 170182,
+    "label": "Pecans",
+    "default_grams": 28,
+    "usda_description": "Nuts, pecans",
+    "tags": []
+  },
+  {
+    "fdc_id": 170568,
+    "label": "Almonds (blanched)",
+    "default_grams": 28,
+    "usda_description": "Nuts, almonds, blanched",
+    "tags": []
+  },
+  {
+    "fdc_id": 170554,
+    "label": "Chia seeds (dry)",
+    "default_grams": 24,
+    "usda_description": "Seeds, chia seeds, dried",
+    "tags": [
+      "weigh-dry"
+    ]
+  },
+  {
+    "fdc_id": 170148,
+    "label": "Hemp seeds",
+    "default_grams": 30,
+    "usda_description": "Seeds, hemp seed, hulled",
+    "tags": []
+  },
+  {
+    "fdc_id": 169414,
+    "label": "Flaxseed (meal)",
+    "default_grams": 14,
+    "usda_description": "Seeds, flaxseed",
+    "tags": [
+      "weigh-dry"
+    ]
+  },
+  {
+    "fdc_id": 171287,
+    "label": "Egg, whole",
+    "default_grams": 50,
+    "usda_description": "Egg, whole, raw, fresh",
+    "tags": []
+  },
+  {
+    "fdc_id": 175139,
+    "label": "Sardines (oil, drained)",
+    "default_grams": 92,
+    "usda_description": "Fish, sardine, Atlantic, canned in oil, drained solids with bone",
+    "tags": []
+  },
+  {
+    "fdc_id": 174219,
+    "label": "Oysters (raw)",
+    "default_grams": 84,
+    "usda_description": "Mollusks, oyster, Pacific, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 174216,
+    "label": "Mussels (raw)",
+    "default_grams": 85,
+    "usda_description": "Mollusks, mussel, blue, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 174214,
+    "label": "Clams (raw)",
+    "default_grams": 85,
+    "usda_description": "Mollusks, clam, mixed species, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 174220,
+    "label": "Scallops (raw)",
+    "default_grams": 85,
+    "usda_description": "Mollusks, scallop, mixed species, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 172885,
+    "label": "Fish stock",
+    "default_grams": 240,
+    "usda_description": "Soup, stock, fish, home-prepared",
+    "tags": []
+  },
+  {
+    "fdc_id": 169230,
+    "label": "Garlic (raw)",
+    "default_grams": 9,
+    "usda_description": "Garlic, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 170000,
+    "label": "Onions (raw)",
+    "default_grams": 110,
+    "usda_description": "Onions, raw",
+    "tags": []
+  },
+  {
+    "fdc_id": 173414,
+    "label": "Cheddar",
+    "default_grams": 28,
+    "usda_description": "Cheese, cheddar (Includes foods for USDA's Food Distribution Program)",
+    "tags": []
+  },
+  {
+    "fdc_id": 173430,
+    "label": "Butter (unsalted)",
+    "default_grams": 14,
+    "usda_description": "Butter, without salt",
+    "tags": []
+  },
+  {
+    "fdc_id": 171314,
+    "label": "Ghee",
+    "default_grams": 14,
+    "usda_description": "Butter, Clarified butter (ghee)",
+    "tags": []
+  },
+  {
+    "fdc_id": 170904,
+    "label": "Kefir (plain)",
+    "default_grams": 240,
+    "usda_description": "Kefir, lowfat, plain, LIFEWAY",
+    "tags": []
+  },
+  {
+    "fdc_id": 172179,
+    "label": "Cottage cheese",
+    "default_grams": 113,
+    "usda_description": "Cheese, cottage, creamed, large or small curd",
+    "tags": []
+  },
+  {
+    "fdc_id": 169279,
+    "label": "Sauerkraut",
+    "default_grams": 100,
+    "usda_description": "Sauerkraut, canned, solids and liquids",
+    "tags": []
+  },
+  {
+    "fdc_id": 169640,
+    "label": "Honey",
+    "default_grams": 21,
+    "usda_description": "Honey",
+    "tags": []
+  },
+  {
+    "fdc_id": 169745,
+    "label": "Spelt, uncooked",
+    "default_grams": 100.0,
+    "usda_description": "Spelt, uncooked",
+    "tags": [
+      "weigh-dry"
+    ]
+  },
+  {
+    "fdc_id": 170557,
+    "label": "Seeds, pumpkin and squash seed kernels",
+    "default_grams": 25.0,
+    "usda_description": "Seeds, pumpkin and squash seed kernels, roasted, without salt",
+    "tags": []
+  },
+  {
+    "fdc_id": 175121,
+    "label": "Fish, mackerel",
+    "default_grams": 100.0,
+    "usda_description": "Fish, mackerel, jack, canned, drained solids",
+    "tags": []
+  },
+  {
+    "fdc_id": 173668,
+    "label": "Fish, herring",
+    "default_grams": 100.0,
+    "usda_description": "Fish, herring, Atlantic, kippered",
+    "tags": []
+  }
+]

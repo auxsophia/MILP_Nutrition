@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Optimize — Convergent Diet</title>
+<style>
+  :root{
+    --ink:#2b2622; --parch:#f4efe4; --parch2:#efe8d8; --line:#d8cdb5;
+    --green:#2e5c3a; --green-soft:#5a8268; --gold:#8b6914; --rust:#8a3d2a; --muted:#7d7363;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--parch);color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;line-height:1.5}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px}
+  header{border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:8px;
+    display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+  h1{font-size:28px;margin:0}
+  .sub{color:var(--muted);font-style:italic;font-size:15px;margin-top:4px}
+  a.nav{color:var(--green);text-decoration:none;font-size:15px;border-bottom:1px solid var(--green-soft)}
+  h2{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--green);
+    border-bottom:1px solid var(--line);padding-bottom:6px;margin:28px 0 14px;font-weight:600}
+  .controls{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-end;
+    padding:14px 16px;background:var(--parch2);border-left:3px solid var(--gold);margin-bottom:8px}
+  .ctl label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+  .toggle{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .toggle button{padding:8px 16px;background:#fbf8f0;border:none;font-family:inherit;font-size:14px;cursor:pointer;color:var(--muted)}
+  .toggle button.on{background:var(--green);color:#fbf8f0}
+  .solve{padding:10px 22px;background:var(--green);color:#fbf8f0;border:none;font-family:inherit;
+    font-size:15px;border-radius:3px;cursor:pointer;letter-spacing:.03em}
+  .solve:hover{background:#244a2f}
+  .excl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 14px;
+    font-size:13.5px;margin-top:4px}
+  .excl label{display:flex;align-items:center;gap:5px;color:var(--ink)}
+  .result{margin-top:8px}
+  .resbar{display:flex;gap:24px;flex-wrap:wrap;padding:12px 16px;background:var(--parch2);
+    border-left:3px solid var(--green);margin-bottom:14px}
+  .resbar.bad{border-left-color:var(--rust)}
+  .resbar .m b{display:block;font-size:22px;color:var(--green);font-weight:600}
+  .resbar .m span{color:var(--muted);font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  td,th{padding:8px;border-bottom:1px solid var(--line);text-align:left}
+  th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .amt{font-variant-numeric:tabular-nums;text-align:right}
+  .stigler{font-size:13.5px;color:var(--rust);font-style:italic;margin-top:12px;
+    padding:10px 14px;background:#f6ece4;border-left:3px solid var(--rust)}
+  .obstacle{font-size:14px;padding:6px 8px;border-bottom:1px solid var(--line)}
+  .obstacle b{color:var(--rust)}
+  .hint{font-size:13px;color:var(--muted);font-style:italic;margin:6px 0 0}
+  .spin{color:var(--muted);font-style:italic}
+  .profile-bar{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-end;
+    padding:14px 18px;background:var(--parch2);border-left:3px solid var(--gold);
+    margin:14px 0 4px}
+  .profile-bar .pm b{display:block;font-size:22px;color:var(--green);font-weight:600}
+  .profile-bar .pm span{color:var(--muted);font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+  .contrib{margin-top:22px}
+  .contrib h3{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin:0 0 10px}
+  .crow{display:grid;grid-template-columns:120px 1fr 78px;gap:10px;align-items:center;margin-bottom:7px}
+  .cname{font-size:13.5px}
+  .cname small{color:var(--muted);display:block;font-size:11px}
+  .cbar{position:relative;height:20px;background:#e7dec9;border-radius:2px;overflow:hidden;display:flex}
+  .cseg{height:100%;border-right:1px solid #fbf8f0}
+  .cmark100{position:absolute;top:-2px;height:24px;border-left:1px dashed var(--ink);opacity:.4}
+  .cpct{font-size:13px;font-variant-numeric:tabular-nums;text-align:right}
+  .cpct.short{color:var(--rust);font-weight:600}
+  .clegend{font-size:11.5px;color:var(--muted);margin-top:6px;display:flex;gap:12px;flex-wrap:wrap}
+  .clegend span{display:flex;align-items:center;gap:4px}
+  .clegend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Optimize</h1>
+      <div class="sub">Let the solver pick the foods — instead of "a serving of everything." Watch what falls out.</div>
+    </div>
+    <a class="nav" href="/">← dashboard</a>
+  </header>
+
+  <div class="profile-bar" id="profileBar">
+    <div class="pm"><b id="p-energy">{{ meta.energy }}</b><span>target kcal · {{ meta.goal }}</span></div>
+    <div class="pm"><b id="p-tdee">{{ meta.tdee }}</b><span>maintenance</span></div>
+    <div class="pm"><b id="p-bmrmethod" style="font-size:13px">{{ meta.bmr_method }}</b><span>bmr {{ meta.bmr }}</span></div>
+    <div class="pm">
+      <label style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">weight lb</label>
+      <input id="p-weight" type="number" value="{{ profile.weight_lb }}" style="width:70px;padding:5px;border:1px solid var(--line);background:#fbf8f0;font-family:inherit;border-radius:2px">
+    </div>
+    <div class="pm">
+      <label style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">lean mass lb (DEXA)</label>
+      <input id="p-lean" type="number" value="{{ profile.lean_mass_lb or '' }}" placeholder="optional" style="width:80px;padding:5px;border:1px solid var(--line);background:#fbf8f0;font-family:inherit;border-radius:2px">
+    </div>
+    <div class="pm">
+      <label style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">goal weight lb</label>
+      <input id="p-target" type="number" value="{{ profile.target_weight_lb }}" style="width:70px;padding:5px;border:1px solid var(--line);background:#fbf8f0;font-family:inherit;border-radius:2px">
+    </div>
+    <div class="pm">
+      <label style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px">goal</label>
+      <div class="toggle" id="goalToggle">
+        <button data-goal="lose" class="{{ 'on' if profile.goal=='lose' }}">lose</button>
+        <button data-goal="maintain" class="{{ 'on' if profile.goal=='maintain' }}">maintain</button>
+        <button data-goal="gain" class="{{ 'on' if profile.goal=='gain' }}">gain</button>
+      </div>
+    </div>
+    <div class="pm">
+      <label style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px">activity</label>
+      <select id="p-activity" style="padding:6px;border:1px solid var(--line);background:#fbf8f0;font-family:inherit;border-radius:2px">
+        {% for a in activities %}<option value="{{ a }}" {{ 'selected' if profile.activity==a }}>{{ a }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="hint" style="margin-bottom:6px">Enter lean mass from a DEXA/body scan to switch to the more accurate Katch-McArdle BMR. This profile is shared with the dashboard.</div>
+
+  <div class="controls">
+    <div class="ctl">
+      <label>Solver</label>
+      <div class="toggle" id="modeToggle">
+        <button data-mode="LP" class="on">LP · grams</button>
+        <button data-mode="MILP">MILP · whole servings</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label>Method</label>
+      <div class="toggle" id="methodToggle">
+        <button data-method="diet" class="on">Optimal day</button>
+        <button data-method="gapfind">Gap-finder</button>
+      </div>
+    </div>
+    <div class="ctl" id="objCtl">
+      <label>Calorie aim</label>
+      <div class="toggle" id="objToggle">
+        <button data-obj="min_calories" class="on">Leanest</button>
+        <button data-obj="hit_calories">Hit target</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <button class="solve" onclick="solve()">Solve</button>
+    </div>
+  </div>
+  <div class="hint" id="methodHint">Optimal day: the leanest way to meet every nutrient floor under your calorie ceiling. This is the classic Stigler problem — expect monotony.</div>
+
+  <h2>Exclude foods <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:400">— your "no, not that combo" lever</span></h2>
+  <div class="excl" id="excl">
+    {% for f in foods %}
+    <label><input type="checkbox" value="{{ f.fdc_id }}"> {{ f.label }}</label>
+    {% endfor %}
+  </div>
+
+  <div id="gapPanel" style="display:none">
+    <h2>What you're already eating <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:400">— gap-finder adds to this</span></h2>
+    <div class="excl" id="current">
+      {% for f in foods %}
+      <label><input type="number" data-fdc="{{ f.fdc_id }}" value="0" style="width:54px"> g {{ f.label }}</label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+let MODE="LP", METHOD="diet", GOAL="{{ profile.goal }}", OBJECTIVE="min_calories";
+document.querySelectorAll('#modeToggle button').forEach(b=>b.onclick=()=>{
+  MODE=b.dataset.mode; setOn('#modeToggle',b);
+});
+document.querySelectorAll('#objToggle button').forEach(b=>b.onclick=()=>{
+  OBJECTIVE=b.dataset.obj; setOn('#objToggle',b);
+  document.getElementById('methodHint').textContent = OBJECTIVE==='hit_calories'
+    ? 'Hit target: fill the plate to land ON your calorie target while meeting every floor — a maintenance/gain day, not a lean one. Different objective, same solver.'
+    : 'Leanest: the fewest calories that meet every floor (the Stigler problem). Tends to under-fill — it is for cutting.';
+});
+document.querySelectorAll('#methodToggle button').forEach(b=>b.onclick=()=>{
+  METHOD=b.dataset.method; setOn('#methodToggle',b);
+  document.getElementById('gapPanel').style.display = METHOD==='gapfind'?'block':'none';
+  document.getElementById('methodHint').textContent = METHOD==='gapfind'
+    ? 'Gap-finder: keep what you already eat (below) and add the smallest amount to close the remaining floors. Cannot return an inedible answer — you chose the base.'
+    : 'Optimal day: the leanest way to meet every nutrient floor under your calorie ceiling. This is the classic Stigler problem — expect monotony.';
+});
+// goal toggle re-solves immediately
+document.querySelectorAll('#goalToggle button').forEach(b=>b.onclick=()=>{
+  GOAL=b.dataset.goal; setOn('#goalToggle',b); solve();
+});
+function setOn(sel,btn){document.querySelectorAll(sel+' button').forEach(x=>x.classList.remove('on'));btn.classList.add('on');}
+
+// stable color per food label
+const PALETTE=['#2e5c3a','#8b6914','#5a8268','#a8763b','#6a7f4f','#9a5b1f','#4a6d8c','#7a5a8a','#b08a3e','#557a6a','#8a6a4a','#6a8a5a','#aa7a5a','#7a8a9a'];
+function colorFor(label,map){ if(!(label in map)){ map[label]=PALETTE[Object.keys(map).length % PALETTE.length]; } return map[label]; }
+
+function renderContributions(contribs, colorMap){
+  if(!contribs || !contribs.length) return '';
+  let h=`<div class="contrib"><h3>Where each nutrient comes from</h3>`;
+  contribs.forEach(n=>{
+    const widthScale = Math.min(n.pct,140);  // bar drawn to % of target, capped 140
+    let segs='';
+    // each segment width is proportional to its share of the TARGET (so the bar reads as % of target)
+    n.segments.forEach(s=>{
+      const w=Math.min(s.pct_of_target,140);
+      segs+=`<div class="cseg" style="width:${w}%;background:${colorFor(s.label,colorMap)}" title="${s.label}: ${s.amount} ${n.unit.toLowerCase()} (${s.pct_of_target}%)"></div>`;
+    });
+    const shortCls=n.pct<99?'short':'';
+    h+=`<div class="crow">
+      <div class="cname">${n.nutrient}<small>${n.total} / ${n.target} ${n.unit.toLowerCase()}</small></div>
+      <div class="cbar"><div class="cmark100" style="left:100%"></div>${segs}</div>
+      <div class="cpct ${shortCls}">${n.pct}%</div>
+    </div>`;
+  });
+  // legend
+  const labels=Object.keys(colorMap);
+  if(labels.length){
+    h+='<div class="clegend">'+labels.map(l=>`<span><i style="background:${colorMap[l]}"></i>${l}</span>`).join('')+'</div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+function gatherProfile(){
+  const p = {
+    goal: GOAL,
+    target_weight_lb: document.getElementById('p-target').value,
+    activity: document.getElementById('p-activity').value,
+    weight_lb: document.getElementById('p-weight').value,
+  };
+  const lean = document.getElementById('p-lean').value;
+  if(lean !== "") p.lean_mass_lb = lean; else p.lean_mass_lb = "";
+  return p;
+}
+function getExclude(){return [...document.querySelectorAll('#excl input:checked')].map(e=>e.value);}
+function getCurrent(){const c={};document.querySelectorAll('#current input[data-fdc]').forEach(e=>{const v=parseFloat(e.value)||0;if(v>0)c[e.dataset.fdc]=v;});return c;}
+
+async function solve(){
+  const box=document.getElementById('result');
+  box.innerHTML='<div class="spin">solving…</div>';
+  const res=await fetch('/api/optimize',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({mode:MODE,method:METHOD,objective:OBJECTIVE,exclude:getExclude(),current:getCurrent(),profile:gatherProfile()})});
+  const r=await res.json();
+  if(r.meta){
+    document.getElementById('p-energy').textContent=r.meta.energy;
+    document.getElementById('p-tdee').textContent=r.meta.tdee;
+    document.getElementById('p-bmrmethod').textContent=r.meta.bmr_method;
+    document.querySelector('#p-bmrmethod').nextElementSibling.textContent='bmr '+r.meta.bmr;
+    document.querySelector('#p-energy').nextElementSibling.textContent='target kcal · '+r.meta.goal;
+  }
+  render(r);
+}
+// re-solve when any profile field changes
+['p-target','p-activity','p-weight','p-lean'].forEach(id=>{
+  document.getElementById(id).addEventListener('change',solve);
+});
+
+function render(r){
+  const box=document.getElementById('result');
+  if(r.status!=='Optimal'){
+    const rel=r.relaxed;
+    let h=`<div class="resbar bad"><div class="m"><b>No full solution</b><span>${r.mode} · ${METHOD}</span></div>`;
+    if(rel){h+=`<div class="m"><b>${rel.energy}</b><span>kcal of ${rel.energy_cap} cap</span></div>
+      <div class="m"><b>${rel.shortfalls.length}</b><span>nutrients short</span></div>`;}
+    h+=`</div>`;
+    h+=`<p class="hint">No combination of the allowed foods meets <i>every</i> floor under your calorie ceiling. Rather than stop there, here is the best achievable diet and exactly where it falls short:</p>`;
+    if(rel && rel.shortfalls.length){
+      h+='<table><tr><th>Nutrient short</th><th class="amt">reached</th><th class="amt">of target</th></tr>';
+      rel.shortfalls.forEach(s=>{ h+=`<tr><td><b style="color:var(--rust)">${s.name}</b></td><td class="amt">${s.got}</td><td class="amt">${s.pct}% of ${s.target}</td></tr>`; });
+      h+='</table>';
+    }
+    if(rel && rel.min_feasible_kcal){
+      h+=`<div class="stigler">To meet <i>every</i> floor from these foods, the calorie ceiling would need to rise to about <b>${rel.min_feasible_kcal} kcal</b> — your current cap is <b>${rel.energy_cap}</b>. The gap is the real finding: a deficit this size can't cover every micronutrient RDA from whole food alone. Options: raise the deficit's ceiling, add a denser food for the short nutrients above, or accept targeted supplementation (e.g. vitamin D) on cutting days.</div>`;
+    } else if(rel){
+      h+=`<div class="stigler">Even with no calorie ceiling, the listed nutrients can't be reached from the current foods — they're structurally absent from this repertoire. Add a food that supplies them, or supplement.</div>`;
+    }
+    if(rel && rel.foods.length){
+      h+=`<p class="hint">Best-achievable plate (${rel.n_foods} foods, ${rel.energy} kcal):</p><table><tr><th>Food</th><th class="amt">amount</th><th class="amt">grams</th></tr>`;
+      rel.foods.forEach(f=>{ h+=`<tr><td>${f.label}</td><td class="amt">${f.household||'—'}</td><td class="amt">${f.grams} g</td></tr>`; });
+      h+='</table>';
+      h+=renderContributions(rel.contributions, {});
+    }
+    box.innerHTML=h;
+    return;
+  }
+  let h=`<div class="resbar"><div class="m"><b>${r.energy}</b><span>kcal</span></div>
+    <div class="m"><b>${r.protein}</b><span>g protein</span></div>
+    <div class="m"><b>${r.n_foods}</b><span>foods chosen</span></div>
+    <div class="m"><b>${r.mode}</b><span>${METHOD==='gapfind'?'added to your plate':'optimal day'}</span></div></div>`;
+  h+='<table><tr><th>Food</th><th class="amt">amount</th>'+(r.mode==='MILP'?'<th class="amt">servings</th>':'')+'<th class="amt">grams</th></tr>';
+  r.foods.forEach(f=>{
+    h+=`<tr><td>${f.label}</td><td class="amt">${f.household||'—'}</td>`+(r.mode==='MILP'?`<td class="amt">${f.servings}</td>`:'')+`<td class="amt">${f.grams} g</td></tr>`;
+  });
+  h+='</table>';
+  if(METHOD==='diet' && r.n_foods<=4){
+    h+=`<div class="stigler">The Stigler trap, live: the mathematically optimal day collapses onto just ${r.n_foods} food(s) in monotonous quantities. Nutritionally complete, humanly unappealing. This is why the gap-finder — which keeps the foods YOU choose and only fills holes — is the mode you'll actually use. The "optimal" answer is a diagnostic, not a menu.</div>`;
+  }
+  h+=renderContributions(r.contributions, {});
+  box.innerHTML=h;
+}
+</script>
+</body>
+</html>

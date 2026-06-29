@@ -1,0 +1,11 @@
+{
+  "sex": "male",
+  "age": "38",
+  "height_in": "68",
+  "weight_lb": "205",
+  "target_weight_lb": "205",
+  "lean_mass_lb": "171",
+  "activity": "moderate",
+  "goal": "maintain",
+  "protein_g_per_kg": "1.9"
+}
