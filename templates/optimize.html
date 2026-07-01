@@ -188,11 +188,37 @@ function colorFor(label,map){ if(!(label in map)){ map[label]=PALETTE[Object.key
 
 function renderContributions(contribs, colorMap){
   if(!contribs || !contribs.length) return '';
-  let h=`<div class="contrib"><h3>Where each nutrient comes from</h3>`;
-  contribs.forEach(n=>{
-    const widthScale = Math.min(n.pct,140);  // bar drawn to % of target, capped 140
+  const aminos = contribs.filter(n=>n.group==='amino_acid');
+  const main = contribs.filter(n=>n.group!=='amino_acid');
+
+  let h='';
+
+  // --- macro pie chart (protein / fat / carb by calories) ---
+  const byName={}; main.forEach(n=>byName[n.nutrient]=n);
+  const pg=(byName['Protein']||{}).total||0;
+  const fg=(byName['Total fat']||{}).total||0;
+  const cg=(byName['Carbohydrate']||{}).total||0;
+  const pcal=pg*4, fcal=fg*9, ccal=cg*4, tot=pcal+fcal+ccal;
+  if(tot>0){
+    const pp=pcal/tot, fp=fcal/tot, cp=ccal/tot;
+    // build conic-gradient pie
+    const p1=Math.round(pp*100), p2=Math.round((pp+fp)*100);
+    h+=`<div class="contrib"><h3>Macro ratio (by calories)</h3>
+      <div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap">
+        <div style="width:130px;height:130px;border-radius:50%;background:conic-gradient(#2e5c3a 0% ${p1}%, #8b6914 ${p1}% ${p2}%, #5a8268 ${p2}% 100%)"></div>
+        <div style="font-size:14px;line-height:1.9">
+          <div><span style="display:inline-block;width:11px;height:11px;background:#2e5c3a;border-radius:2px;margin-right:6px"></span>Protein — ${Math.round(pp*100)}% (${pg} g)</div>
+          <div><span style="display:inline-block;width:11px;height:11px;background:#8b6914;border-radius:2px;margin-right:6px"></span>Fat — ${Math.round(fp*100)}% (${fg} g)</div>
+          <div><span style="display:inline-block;width:11px;height:11px;background:#5a8268;border-radius:2px;margin-right:6px"></span>Carbs — ${Math.round(cp*100)}% (${cg} g)</div>
+        </div>
+      </div></div>`;
+  }
+
+  // --- main nutrient bars ---
+  h+=`<div class="contrib"><h3>Where each nutrient comes from</h3>`;
+  main.forEach(n=>{
+    if(n.nutrient==='Energy') return;  // shown as cap elsewhere
     let segs='';
-    // each segment width is proportional to its share of the TARGET (so the bar reads as % of target)
     n.segments.forEach(s=>{
       const w=Math.min(s.pct_of_target,140);
       segs+=`<div class="cseg" style="width:${w}%;background:${colorFor(s.label,colorMap)}" title="${s.label}: ${s.amount} ${n.unit.toLowerCase()} (${s.pct_of_target}%)"></div>`;
@@ -204,12 +230,32 @@ function renderContributions(contribs, colorMap){
       <div class="cpct ${shortCls}">${n.pct}%</div>
     </div>`;
   });
-  // legend
   const labels=Object.keys(colorMap);
   if(labels.length){
     h+='<div class="clegend">'+labels.map(l=>`<span><i style="background:${colorMap[l]}"></i>${l}</span>`).join('')+'</div>';
   }
   h+='</div>';
+
+  // --- amino acid list (under protein) ---
+  if(aminos.length){
+    h+=`<div class="contrib"><h3>Essential amino acids <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:400">— completeness, not just quantity</span></h3>`;
+    aminos.forEach(n=>{
+      let segs='';
+      n.segments.forEach(s=>{
+        const w=Math.min(s.pct_of_target,140);
+        segs+=`<div class="cseg" style="width:${w}%;background:${colorFor(s.label,colorMap)}" title="${s.label}: ${s.amount} mg (${s.pct_of_target}%)"></div>`;
+      });
+      const shortCls=n.pct<99?'short':'';
+      h+=`<div class="crow">
+        <div class="cname">${n.nutrient}<small>${n.total} / ${n.target} mg</small></div>
+        <div class="cbar"><div class="cmark100" style="left:100%"></div>${segs}</div>
+        <div class="cpct ${shortCls}">${n.pct}%</div>
+      </div>`;
+    });
+    h+=`<div class="hint" style="margin-top:8px">The lowest bar is your <b>limiting amino acid</b> — it caps usable protein. Grains run low on lysine, legumes on methionine; together they complete each other. Eggs, dairy, and shellfish are complete on their own.</div>`;
+    h+='</div>';
+  }
+
   return h;
 }
 
@@ -251,20 +297,25 @@ function render(r){
   const box=document.getElementById('result');
   if(r.status!=='Optimal'){
     const rel=r.relaxed;
-    let h=`<div class="resbar bad"><div class="m"><b>No full solution</b><span>${r.mode} · ${METHOD}</span></div>`;
+    const nShort = rel ? rel.shortfalls.length : 0;
+    let h=`<div class="resbar bad"><div class="m"><b>${nShort>0?'No full solution':'Borderline'}</b><span>${r.mode} · ${METHOD}</span></div>`;
     if(rel){h+=`<div class="m"><b>${rel.energy}</b><span>kcal of ${rel.energy_cap} cap</span></div>
-      <div class="m"><b>${rel.shortfalls.length}</b><span>nutrients short</span></div>`;}
+      <div class="m"><b>${nShort}</b><span>nutrients short</span></div>`;}
     h+=`</div>`;
-    h+=`<p class="hint">No combination of the allowed foods meets <i>every</i> floor under your calorie ceiling. Rather than stop there, here is the best achievable diet and exactly where it falls short:</p>`;
-    if(rel && rel.shortfalls.length){
+    if(nShort>0){
+      h+=`<p class="hint">No combination of the allowed foods meets <i>every</i> floor under your calorie ceiling. Here is the best achievable diet and exactly where it falls short:</p>`;
       h+='<table><tr><th>Nutrient short</th><th class="amt">reached</th><th class="amt">of target</th></tr>';
       rel.shortfalls.forEach(s=>{ h+=`<tr><td><b style="color:var(--rust)">${s.name}</b></td><td class="amt">${s.got}</td><td class="amt">${s.pct}% of ${s.target}</td></tr>`; });
       h+='</table>';
-    }
-    if(rel && rel.min_feasible_kcal){
-      h+=`<div class="stigler">To meet <i>every</i> floor from these foods, the calorie ceiling would need to rise to about <b>${rel.min_feasible_kcal} kcal</b> — your current cap is <b>${rel.energy_cap}</b>. The gap is the real finding: a deficit this size can't cover every micronutrient RDA from whole food alone. Options: raise the deficit's ceiling, add a denser food for the short nutrients above, or accept targeted supplementation (e.g. vitamin D) on cutting days.</div>`;
-    } else if(rel){
-      h+=`<div class="stigler">Even with no calorie ceiling, the listed nutrients can't be reached from the current foods — they're structurally absent from this repertoire. Add a food that supplies them, or supplement.</div>`;
+      if(rel.min_feasible_kcal){
+        h+=`<div class="stigler">To meet <i>every</i> floor from these foods, the calorie ceiling would need to rise to about <b>${rel.min_feasible_kcal} kcal</b> — your current cap is <b>${rel.energy_cap}</b>. Options: raise the ceiling, add a denser food for the short nutrients above, or supplement them.</div>`;
+      } else {
+        h+=`<div class="stigler">Even with no calorie ceiling, the nutrients above can't be reached from the allowed foods — they're structurally absent from this (filtered) repertoire. Excluding foods removed your sources for them. Add a food that supplies them, un-exclude something, or supplement.</div>`;
+      }
+    } else {
+      // infeasible by the strict solver, but the relaxed plate met every floor:
+      // this is a borderline/rounding case, not a real shortfall.
+      h+=`<p class="hint">The strict solver couldn't land an exact solution, but the best-achievable plate below actually meets every floor (within rounding). This is a borderline-feasible case — your exclusions left just barely enough. Treat the plate below as valid; nudge a serving up if any nutrient sits right at 100%.</p>`;
     }
     if(rel && rel.foods.length){
       h+=`<p class="hint">Best-achievable plate (${rel.n_foods} foods, ${rel.energy} kcal):</p><table><tr><th>Food</th><th class="amt">amount</th><th class="amt">grams</th></tr>`;

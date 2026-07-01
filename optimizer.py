@@ -81,6 +81,11 @@ def _floors_ceilings(targets):
         if key == "_meta":
             continue
         nid = t["nutrient_id"]
+        # amino acids are tracked and displayed, but NOT enforced as solver floors
+        # (enforcing all 9 would over-constrain and risk infeasibility cascades;
+        # they're shown in the readout so you can see complementation yourself).
+        if t.get("group") == "amino_acid":
+            continue
         if t["kind"] == "floor":
             floors[nid] = t["target"]
         if nid == ENERGY:
@@ -277,7 +282,9 @@ def best_achievable(rows, targets, exclude=None, max_grams=400):
     for nid, tgt in floors.items():
         got = totals.get(nid, 0)
         pct = round(100 * got / tgt) if tgt else 100
-        if pct < 99:
+        # show anything under 100% (not 99%) so borderline misses aren't hidden;
+        # round-trip the pct so a 99.4% miss still surfaces as short.
+        if got < tgt - 1e-6:
             shortfalls.append({"name": name.get(nid, str(nid)), "target": round(tgt, 1),
                                "got": round(got, 1), "pct": pct})
     shortfalls.sort(key=lambda s: s["pct"])
@@ -315,14 +322,16 @@ def contributions(chosen_foods, a, targets, key_nutrients=None):
     Per-nutrient breakdown: for each tracked nutrient, how much each food
     contributes (for the stacked contribution bars). Returns a list of:
       {nutrient, unit, target, total, pct, segments:[{label, amount, pct_of_target}]}
-    key_nutrients: list of nutrient_ids to include (defaults to a useful subset
-    plus any floor that's currently short).
+    key_nutrients: list of nutrient_ids to include. If None, includes EVERY
+    nutrient that has a target (all floors + ceilings), so the readout is
+    complete rather than a chosen subset.
     """
     tmeta = {t["nutrient_id"]: t for k, t in targets.items() if k != "_meta"}
     if key_nutrients is None:
-        # headline + common-gap nutrients
-        key_nutrients = [PROTEIN, 1090, 1089, 1095, 1087, 1092, 1079, 1162]  # protein, Mg, Fe, Zn, Ca, K, fiber, vit C
-        key_nutrients = [n for n in key_nutrients if n in tmeta]
+        # all tracked nutrients, in a sensible order: macros, then the rest
+        macro_order = [ENERGY, PROTEIN, 1004, 1005, 1079]  # energy, protein, fat, carb, fiber
+        rest = [nid for nid in tmeta if nid not in macro_order]
+        key_nutrients = [n for n in macro_order if n in tmeta] + rest
     out = []
     for nid in key_nutrients:
         t = tmeta.get(nid)
@@ -344,6 +353,8 @@ def contributions(chosen_foods, a, targets, key_nutrients=None):
             "target": tgt, "total": round(total, 1),
             "pct": round(100 * total / tgt) if tgt else 0,
             "segments": segs,
+            "kind": t.get("kind", "floor"),
+            "group": t.get("group", "nutrient"),
         })
     return out
 

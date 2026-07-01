@@ -87,8 +87,32 @@ UPPER_LIMITS = {
     1162: 2000,  # vitamin C mg
     1114: 100,   # vitamin D ug
     1106: 3000,  # vitamin A ug (preformed)
-    1090: 350,   # magnesium mg (from supplements only, flag softly)
     1093: 2300,  # sodium mg (CDL, not a UL but a ceiling)
+    # NOTE: magnesium (1090) deliberately has NO upper limit here. The 350mg UL
+    # applies ONLY to supplemental magnesium, not food magnesium (which has no
+    # established UL). Enforcing 350 as a ceiling contradicted the 420mg floor
+    # and made every diet infeasible on magnesium. Food magnesium is unbounded.
+}
+
+# ULs that apply ONLY to supplements, not food — shown as advisory flags in the
+# UI but NOT enforced as optimizer ceilings (food sources have no such limit).
+SUPPLEMENT_ONLY_UL = {
+    1090: 350,   # magnesium mg — supplemental only
+}
+
+
+# Essential amino acids: WHO/FAO 2007 requirements in mg per kg body weight per day.
+# These scale with body weight (like protein). nutrient_id -> (name, mg_per_kg).
+ESSENTIAL_AMINO_ACIDS = {
+    1221: ("Histidine", 10),
+    1212: ("Isoleucine", 20),
+    1213: ("Leucine", 39),
+    1214: ("Lysine", 30),
+    1215: ("Methionine", 10.4),     # methionine + cysteine combined ~15; Met alone ~10.4
+    1217: ("Phenylalanine", 25),    # phenylalanine + tyrosine combined
+    1211: ("Threonine", 15),
+    1210: ("Tryptophan", 4),
+    1219: ("Valine", 26),
 }
 
 
@@ -186,6 +210,15 @@ def compute_targets(profile):
             "target": val, "scaling": "fixed population RDA (sex/age)",
             "kind": "floor",
             "upper_limit": UPPER_LIMITS.get(nid),
+        }
+
+    # --- essential amino acids (scale with body weight, like protein) ---
+    for nid, (name, mg_per_kg) in ESSENTIAL_AMINO_ACIDS.items():
+        targets["aa_" + name.lower()] = {
+            "nutrient_id": nid, "name": name, "unit": "MG",
+            "target": round(mg_per_kg * weight_kg),
+            "scaling": "body weight (WHO/FAO)", "kind": "floor",
+            "group": "amino_acid",
         }
 
     return targets
