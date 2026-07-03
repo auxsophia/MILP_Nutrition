@@ -22,6 +22,8 @@ import repertoire_store as store
 import profile_store as pstore
 import bioavailability as bio
 import optimizer as opt
+import meal_store as meals
+import food_groups as fg
 from repertoire import DEFAULT_PROFILE
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -164,6 +166,136 @@ def api_optimize():
     # echo the meta so the page can show what it solved against
     res["meta"] = targets["_meta"]
     return jsonify(res)
+
+
+@app.route("/planner")
+def planner_page():
+    repertoire = store.load()
+    rows, *_ = dl.build_repertoire_table(repertoire)
+    row_by_id = {r["fdc_id"]: r for r in rows}
+    rep_by_id = {i["fdc_id"]: i for i in repertoire}
+    groups = []
+    for gname, items in fg.grouped(repertoire):
+        entries = []
+        for it in items:
+            r = row_by_id.get(it["fdc_id"])
+            if not r:
+                continue
+            repitem = rep_by_id.get(it["fdc_id"], {})
+            default_unit = _pick_default_unit(
+                repitem.get("preferred_portion"), r["portions"],
+                r["default_grams"], repitem.get("serving"))
+            entries.append({
+                "fdc_id": r["fdc_id"], "label": r["label"],
+                "default_grams": r["default_grams"],
+                "portions": r["portions"],
+                "default_unit": default_unit,
+            })
+        if entries:
+            groups.append({"group": gname, "foods": entries})
+    saved = meals.load()
+    return render_template("planner.html", groups=groups, saved=saved)
+
+
+def _pick_default_unit(pref, portions, default_grams, serving):
+    """Choose the unit a food is entered in by default. Prefers whole countable
+    portions over cup fractions so '1 large egg' beats '0.53 cup'."""
+    if pref:
+        for p in portions:
+            if p["description"] == pref:
+                return {"desc": p["description"], "grams_each": p["grams"]}
+    if serving and serving.get("portion_desc") and serving["portion_desc"] != "grams":
+        for p in portions:
+            if p["description"] == serving["portion_desc"]:
+                return {"desc": p["description"], "grams_each": p["grams"]}
+    countable = ["egg", "can", "slice", "fillet", "piece", "large", "medium",
+                 "small", "fruit", "clove", "unit", "whole"]
+    for p in portions:
+        if any(w in p["description"].lower() for w in countable):
+            return {"desc": p["description"], "grams_each": p["grams"]}
+    for p in portions:
+        if "cup" in p["description"].lower():
+            return {"desc": p["description"], "grams_each": p["grams"]}
+    return {"desc": "grams", "grams_each": 1.0}
+
+
+def meal_nutrition(items, profile, meal_fraction=1.0):
+    """Compute a meal's nutrition from [{fdc_id, servings}]. meal_fraction scales
+    the daily targets (1.0 = full day, 0.4 = ~one of 2 meals + snack)."""
+    repertoire = store.load()
+    rows, *_ = dl.build_repertoire_table(repertoire)
+    row_by_id = {r["fdc_id"]: r for r in rows}
+    # build grams per food from servings
+    servings = {}
+    chosen_rows = []
+    for it in items:
+        r = row_by_id.get(int(it["fdc_id"]))
+        if not r:
+            continue
+        grams = float(it["servings"]) * r["default_grams"]
+        servings[r["fdc_id"]] = grams
+        chosen_rows.append({**r, "grams": grams})
+    targets = tg.compute_targets(profile)
+    # scale targets by meal_fraction for the coverage display
+    scaled = {}
+    for k, t in targets.items():
+        if k == "_meta":
+            scaled[k] = t
+            continue
+        scaled[k] = {**t, "target": round(t["target"] * meal_fraction, 1)}
+    cov = coverage(servings, scaled, rows, bio.DEFAULT_MEAL)
+    # per-food contribution breakdown (reuse optimizer.contributions)
+    a = {r["fdc_id"]: r["per_100g"] for r in rows}
+    contribs = opt.contributions(
+        [{"fdc_id": r["fdc_id"], "label": r["label"], "grams": r["grams"]} for r in chosen_rows],
+        a, scaled)
+    return {"coverage": cov, "contributions": contribs,
+            "meal_fraction": meal_fraction}
+
+
+@app.route("/api/meal/nutrition", methods=["POST"])
+def api_meal_nutrition():
+    d = request.get_json(force=True)
+    profile = pstore.load()
+    frac = float(d.get("meal_fraction", 1.0))
+    return jsonify(meal_nutrition(d.get("items", []), profile, frac))
+
+
+@app.route("/api/meal/save", methods=["POST"])
+def api_meal_save():
+    d = request.get_json(force=True)
+    m = meals.upsert({
+        "id": d.get("id"), "name": d.get("name", "Untitled meal"),
+        "items": d.get("items", []), "spices": d.get("spices", ""),
+    })
+    return jsonify({"ok": True, "meal": m, "meals": meals.load()})
+
+
+@app.route("/api/meal/delete", methods=["POST"])
+def api_meal_delete():
+    d = request.get_json(force=True)
+    meals.delete(d["id"])
+    return jsonify({"ok": True, "meals": meals.load()})
+
+
+@app.route("/api/staple/rename", methods=["POST"])
+def api_rename():
+    d = request.get_json(force=True)
+    store.rename(d["fdc_id"], d["label"])
+    return jsonify({"ok": True, "repertoire": store.load()})
+
+
+@app.route("/api/staple/preferred_portion", methods=["POST"])
+def api_preferred_portion():
+    d = request.get_json(force=True)
+    store.set_preferred_portion(d["fdc_id"], d["portion_desc"], d["grams_each"])
+    return jsonify({"ok": True, "repertoire": store.load()})
+
+
+@app.route("/api/staple/snapshot")
+def api_snapshot():
+    fdc = int(request.args.get("fdc_id"))
+    return jsonify(dl.food_snapshot(fdc))
 
 
 @app.route("/api/recalculate", methods=["POST"])

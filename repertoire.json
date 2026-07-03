@@ -355,5 +355,12 @@
     "default_grams": 100.0,
     "usda_description": "Fish, herring, Atlantic, kippered",
     "tags": []
+  },
+  {
+    "fdc_id": 169949,
+    "label": "Plums",
+    "default_grams": 100.0,
+    "usda_description": "Plums, raw",
+    "tags": []
   }
 ]

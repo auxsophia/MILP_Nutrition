@@ -93,6 +93,29 @@ def set_serving(fdc_id, qty, portion_desc, grams):
     return save(items)
 
 
+def rename(fdc_id, new_label):
+    """Change the display label for a food (e.g. 'Oysters (raw)' -> 'Oysters,
+    canned'). Does not change what USDA entry it points to."""
+    items = load()
+    for i in items:
+        if int(i["fdc_id"]) == int(fdc_id):
+            i["label"] = new_label.strip() or i["label"]
+    return save(items)
+
+
+def set_preferred_portion(fdc_id, portion_desc, grams_each):
+    """Set the food's DEFAULT unit to a household portion (e.g. '1 large egg',
+    '1 cup'). Stores the portion as the serving with qty=1, so the planner shows
+    whole portions instead of odd cup fractions. grams_each is grams per 1 unit."""
+    items = load()
+    for i in items:
+        if int(i["fdc_id"]) == int(fdc_id):
+            i["serving"] = {"qty": 1.0, "portion_desc": portion_desc}
+            i["default_grams"] = float(grams_each)
+            i["preferred_portion"] = portion_desc
+    return save(items)
+
+
 def search(term, limit=40):
     """
     Search loaded USDA food descriptions for a term. Returns matching foods
